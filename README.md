@@ -14,6 +14,8 @@ This repository template is just a basic example of _how_ to do things with them
 `wfarr/my-boxen`). **Make sure it is a private repository!**
 1. Use your install of [boxen-web](https://github.com/boxen/boxen-web) or get running manually like so:
   ```
+  sudo mkdir -p /opt/boxen
+  sudo chown $USER:admin /opt/boxen
   mkdir -p ~/src/my-boxen
   cd ~/src/my-boxen
   git init
@@ -25,6 +27,7 @@ This repository template is just a basic example of _how_ to do things with them
   
   script/boxen
   ```
+  
 1. Close and reopen your Terminal. If you have a shell config file
 (eg. `~/.bashrc`) you'll need to add this at the very end:
 `[ -f /opt/boxen/env.sh ] && source /opt/boxen/env.sh`, and reload
@@ -84,6 +87,49 @@ provide as optional installs under the
 [boxen organization](https://github.com/boxen). These modules are all
 tested to be compatible with Boxen. Use the `Puppetfile` to pull them
 in dependencies automatically whenever `boxen` is run. 
+
+### Including boxen modules from github (boxen/puppet-<name>)
+
+You must add the github information for your added Puppet module into your Puppetfile at the root of your
+boxen repo (ex. /path/to/your-boxen/Puppetfile):
+
+    # Core modules for a basic development environment. You can replace
+    # some/most of these if you want, but it's not recommended.
+
+    github "dnsmasq",  "1.0.0"
+    github "gcc",      "1.0.0"
+    github "git",      "1.0.0"
+    github "homebrew", "1.0.0"
+    github "hub",      "1.0.0"
+    github "inifile",  "0.9.0", :repo => "cprice-puppet/puppetlabs-inifile"
+    github "nginx",    "1.0.0"
+    github "nodejs",   "1.0.0"
+    github "nvm",      "1.0.0"
+    github "ruby",     "1.0.0"
+    github "stdlib",   "3.0.0", :repo => "puppetlabs/puppetlabs-stdlib"
+    github "sudo",     "1.0.0"
+    
+    # Optional/custom modules. There are tons available at
+    # https://github.com/boxen.
+    
+    github "java",     "1.0.5"
+    
+In the above snippet of a customized Puppetfile, the bottom line 
+includes the Java module from Github using the tag "1.0.5" from the github repository 
+"boxen/puppet-java".  The function "github" is defined at the top of the Puppetfile 
+and takes the name of the module, the version, and optional repo location:
+
+    def github(name, version, options = nil)
+      options ||= {}
+      options[:repo] ||= "boxen/puppet-#{name}"
+      mod name, version, :github_tarball => options[:repo]
+    end
+
+Now Puppet knows where to download the module from when you include it in your site.pp or mypersonal.pp file:
+
+    # include the java module referenced in my Puppetfile with the line
+    # github "java",     "1.0.5"
+    include java
 
 ### Node definitions
 
